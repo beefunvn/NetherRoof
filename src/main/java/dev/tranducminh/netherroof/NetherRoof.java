@@ -1,6 +1,5 @@
 package dev.tranducminh.netherroof;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -9,7 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.concurrent.TimeUnit;
 
 public class NetherRoof extends JavaPlugin implements Listener {
 
@@ -26,20 +26,17 @@ public class NetherRoof extends JavaPlugin implements Listener {
 
         if (enabled) {
             getServer().getPluginManager().registerEvents(this, this);
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
+            getServer().getAsyncScheduler().runAtFixedRate(this, task -> {
+                for (Player player : getServer().getOnlinePlayers()) {
+                    player.getScheduler().execute(this, () -> {
                         if (player.getWorld().getEnvironment() == World.Environment.NETHER && player.getLocation().getY() > 127) {
                             int damageTicks = player.getTicksLived() % damageIntervalTicks;
                             double totalDamage = damagePerTick * Math.min(damageTicks, maxDamageTicks) / 20.0;
                             player.damage(totalDamage);
                         }
-                    }
+                    }, null,1L);
                 }
-            }.runTaskTimer(this, 0L, 1L);
-        } else {
+            }, 1L, 50L, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -53,6 +50,7 @@ public class NetherRoof extends JavaPlugin implements Listener {
         if (player.getWorld().getEnvironment() == World.Environment.NETHER && player.getLocation().getY() > 127) {
             int damageTicks = player.getTicksLived() % damageIntervalTicks;
             if (damageTicks >= maxDamageTicks) {
+                // Not implemented yet
             }
         }
     }
