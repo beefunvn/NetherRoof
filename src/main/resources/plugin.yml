@@ -1,0 +1,5 @@
+name: NetherRoof
+version: '${project.version}'
+main: dev.tranducminh.netherroof.NetherRoof
+api-version: '1.20'
+folia-supported: true
